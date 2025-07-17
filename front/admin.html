@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Panel Admin</title>
+  </head>
+  <body>
+    <h1>Bienvenido al Panel de Admin</h1>
+    <button onclick="logout()">Cerrar sesión</button>
+    <h2>Panel Admin - Motos</h2>
+    <div id="admin-motos" class="grid"></div>
+
+    <script>
+        const token = localStorage.getItem('token');
+
+  if (!token) {
+    window.location.href = 'index.html';
+  }
+
+  fetch('http://localhost:3000/api/dashboard', {
+    headers: {
+      'Authorization': token
+    }
+  })
+    .then(res => res.json())
+    .then(motos => {
+      const container = document.getElementById('admin-motos');
+      motos.forEach(moto => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${moto.nombre}</h3>
+          <p>Precio: $${moto.precio}</p>
+          <p>Año: ${moto.anio}</p>
+          <button onclick="editarMoto(${moto.id})">Editar</button>
+          <button onclick="eliminarMoto(${moto.id})">Eliminar</button>
+        `;
+        container.appendChild(card);
+      });
+    });
+
+  function editarMoto(id) {
+    alert("Editar moto " + id);
+    // Aquí podrías mostrar un formulario para editar
+  }
+
+  function eliminarMoto(id) {
+    if (confirm("¿Eliminar moto " + id + "?")) {
+      fetch(`http://localhost:3000/api/dashboard/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': token }
+      })
+      .then(() => location.reload());
+    }
+  }
+
+      function logout() {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
+</html>

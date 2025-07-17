@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Motos</title>
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+  <h1>Catálogo de Motos</h1>
+  <div id="motos-container" class="grid"></div>
+
+  <script>
+    fetch('http://localhost:3000/api/public/motos')
+      .then(res => res.json())
+      .then(motos => {
+        const container = document.getElementById('motos-container');
+        motos.forEach(moto => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${moto.nombre}</h3>
+            <p>Precio: $${moto.precio}</p>
+            <p>Año: ${moto.anio}</p>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => {
+        document.getElementById('motos-container').innerText = 'Error al cargar las motos';
+      });
+  </script>
+</body>
+</html>

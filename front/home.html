@@ -1,13 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <title>Listado de Motos</title>
+  <title>Tienda - Home</title>
   <link rel="stylesheet" href="css/home.css">
 </head>
+
 <body>
-  <h1>Catálogo de Motos</h1>
-  <div id="motos-container" class="grid"></div>
+  <nav>
+    <div class="navbar-home">
+      <h3 class="navbar-title">Mi tienda</h3>
+    </div>
+  </nav>
+  <div class="banner-home">
+    <img src="./assets/banners00.jpg" alt="">
+  </div>
+  <h1 class="catalogo-title">Catálogo de Motos</h1>
+  <div class="cards-containers">
+    <div id="motos-container" class="grid"></div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2025 Mi tienda. Todos los derechos reservados.</p>
+      <p><a href="mailto:contacto@tuempresa.com">contacto@mail.com</a></p>
+    </div>
+  </footer>
 
   <script>
     fetch('http://localhost:3000/api/public/motos')
@@ -18,9 +36,11 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
+          <img src="http://localhost:3000/uploads/${moto.imagen}" alt="${moto.nombre}" width="100%">
             <h3>${moto.nombre}</h3>
             <p>Precio: $${moto.precio}</p>
             <p>Año: ${moto.anio}</p>
+            <button class="card-btn-wpp">Contactanos</button>
           `;
           container.appendChild(card);
         });
@@ -30,4 +50,5 @@
       });
   </script>
 </body>
+
 </html>

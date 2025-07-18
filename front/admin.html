@@ -1,63 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Panel Admin</title>
-  </head>
-  <body>
-    <h1>Bienvenido al Panel de Admin</h1>
-    <button onclick="logout()">Cerrar sesión</button>
-    <h2>Panel Admin - Motos</h2>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="css/admin.css">
+  <title>Panel Admin</title>
+</head>
+
+<body>
+  <nav>
+    <div class="navbar-admin">      
+      <h4>Bienvenido Admin</h4>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
+  <h2 class="form-title">Agregar / Editar Moto</h2>
+  <div class="form-container">
+    <form id="form-moto">
+      <input type="hidden" id="id">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="number" id="precio" placeholder="Precio" required>
+      <input type="number" id="anio" placeholder="Año" required>
+      <input type="file" id="imagen" accept="image/*">
+      <button type="submit">Guardar</button>
+    </form>
+  </div>
+  <hr>
+  <h2 class="cards-container-title">Motos Cargadas</h2>
+  <div class="cards-container">
     <div id="admin-motos" class="grid"></div>
+  </div>
 
-    <script>
-        const token = localStorage.getItem('token');
 
-  if (!token) {
-    window.location.href = 'index.html';
-  }
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'index.html';
 
-  fetch('http://localhost:3000/api/dashboard', {
-    headers: {
-      'Authorization': token
-    }
-  })
-    .then(res => res.json())
-    .then(motos => {
-      const container = document.getElementById('admin-motos');
-      motos.forEach(moto => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <h3>${moto.nombre}</h3>
-          <p>Precio: $${moto.precio}</p>
-          <p>Año: ${moto.anio}</p>
-          <button onclick="editarMoto(${moto.id})">Editar</button>
-          <button onclick="eliminarMoto(${moto.id})">Eliminar</button>
-        `;
-        container.appendChild(card);
-      });
+    const form = document.getElementById('form-moto');
+    const nombre = document.getElementById('nombre');
+    const precio = document.getElementById('precio');
+    const anio = document.getElementById('anio');
+    const idHidden = document.getElementById('id');
+    const container = document.getElementById('admin-motos');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('nombre', nombre.value);
+      formData.append('precio', precio.value);
+      formData.append('anio', anio.value);
+      if (imagen.files[0]) formData.append('imagen', imagen.files[0]);
+
+      const id = idHidden.value;
+      const url = id ? `http://localhost:3000/api/dashboard/${id}` : `http://localhost:3000/api/dashboard`;
+      const method = id ? 'PUT' : 'POST';
+
+      fetch(url, {
+        method,
+        headers: { 'Authorization': token },
+        body: formData
+      })
+        .then(res => res.json())
+        .then(() => {
+          form.reset();
+          idHidden.value = '';
+          cargarMotos();
+        });
     });
 
-  function editarMoto(id) {
-    alert("Editar moto " + id);
-    // Aquí podrías mostrar un formulario para editar
-  }
 
-  function eliminarMoto(id) {
-    if (confirm("¿Eliminar moto " + id + "?")) {
-      fetch(`http://localhost:3000/api/dashboard/${id}`, {
-        method: 'DELETE',
+    function cargarMotos() {
+      fetch('http://localhost:3000/api/dashboard', {
         headers: { 'Authorization': token }
       })
-      .then(() => location.reload());
+        .then(res => res.json())
+        .then(motos => {
+          container.innerHTML = '';
+          motos.forEach(moto => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+        <img src="http://localhost:3000/uploads/${moto.imagen}" alt="${moto.nombre}" width="100%">
+          <h3>${moto.nombre}</h3>
+          <p>Precio: $${moto.precio}</p>
+          <p>Año: ${moto.anio}</p>       
+          <button onclick="editarMoto(${moto.id}, '${moto.nombre}', ${moto.precio}, ${moto.anio})">Editar</button>
+          <button onclick="eliminarMoto(${moto.id})">Eliminar</button>
+        `;
+            container.appendChild(card);
+          });
+        });
     }
-  }
 
-      function logout() {
-        localStorage.removeItem("token");
-        window.location.href = "index.html";
+    function editarMoto(id, nombreVal, precioVal, anioVal) {
+      idHidden.value = id;
+      nombre.value = nombreVal;
+      precio.value = precioVal;
+      anio.value = anioVal;
+    }
+
+    function eliminarMoto(id) {
+      if (confirm('¿Eliminar moto?')) {
+        fetch(`http://localhost:3000/api/dashboard/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': token }
+        })
+          .then(() => cargarMotos());
       }
-    </script>
-  </body>
+    }
+
+    cargarMotos();
+
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+
 </html>
